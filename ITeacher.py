@@ -1,12 +1,40 @@
 import mysql.connector
+import json
+from abc import ABC, abstractmethod
+
+
+class ITeacher(ABC):
+    """Is used to add teachers the the database"""
+    @abstractmethod
+    def save(self): pass
+    """Saves information about a teacher to the database"""
+
+    @property
+    @abstractmethod
+    def first_name(self): pass
+
+    @property
+    @abstractmethod
+    def last_name(self): pass
+
+    @first_name.setter
+    @abstractmethod
+    def first_name(self, value): pass
+
+    @last_name.setter
+    @abstractmethod
+    def last_name(self, value): pass
 
 
 class Teacher:
     def __init__(self, first_name: str, last_name: str):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403'
+            host=data['host'],
+            user=data['user'],
+            password=data['password']
         )
         self.first_name = first_name
         self.last_name = last_name
@@ -15,10 +43,12 @@ class Teacher:
         mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
         mycursor.close()
 
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403',
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
             database='CourseFactory'
         )
         mycursor = self.mydb.cursor(buffered=True)
@@ -62,8 +92,3 @@ class Teacher:
         if not isinstance(value, str):
             raise TypeError('Last name must be str type')
         self.__last_name = value
-
-
-# a = Teacher('George', 'Kim')
-# a.save()
-# print(a)

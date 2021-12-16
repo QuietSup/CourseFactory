@@ -9,13 +9,74 @@ from ILocalCourse import LocalCourse
 from IOffsiteCourse import OffsiteCourse
 
 
-class CourseFactory:
+class ICourseFactory(ABC):
+    """General class to operate with all the data including creating and deleting data"""
+    @staticmethod
+    @abstractmethod
+    def new_local(title: str, first_name: str, last_name: str,
+                  topic: list[str], street: str, building: int): pass
+    """Creates new local course in the database"""
+
+    @staticmethod
+    @abstractmethod
+    def new_offsite(title: str, first_name: str, last_name: str, topic: list[str],
+                    country: str, city: str, street: str, building: int): pass
+    """Creates new offsite course in the database"""
+
+    @abstractmethod
+    @property
+    def locals(self): pass
+    """Returns all the local courses"""
+
+    @abstractmethod
+    @property
+    def offsites(self): pass
+    """Returns all the offsite courses"""
+
+
+    @staticmethod
+    @abstractmethod
+    def new_teacher(first_name: str, last_name: str): pass
+    """Creates teacher field in the database"""
+
+    @staticmethod
+    @abstractmethod
+    def new_topic(title: str): pass
+    """Creates new topic"""
+
+    @abstractmethod
+    def del_course(self, title: str): pass
+    """Deletes the course"""
+
+    @abstractmethod
+    def find_teacher(self, first_name: str, last_name: str): pass
+    """Find the teacher by name"""
+
+    @abstractmethod
+    def find_course(self, title: str): pass
+    """find a course by a title"""
+
+
+class CourseFactory(ICourseFactory):
     def __init__(self):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403'
+            host=data['host'],
+            user=data['user'],
+            password=data['password']
         )
+
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
+        self.mydb = mysql.connector.connect(
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
+            database='CourseFactory'
+        )
+
         mycursor = self.mydb.cursor(buffered=True)
         mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
         mycursor.close()

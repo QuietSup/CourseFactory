@@ -1,12 +1,32 @@
 import mysql.connector
+import json
+from abc import ABC, abstractmethod
 
 
-class Topic:
+class ITopic(ABC):
+    """Is used to add topics to the database"""
+    @abstractmethod
+    def save(self): pass
+    """Save entered data about topic to the database"""
+
+    @property
+    @abstractmethod
+    def title(self): pass
+
+    @title.setter
+    @abstractmethod
+    def title(self, value): pass
+
+
+class Topic(ITopic):
     def __init__(self, title: str):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403'
+            host=data['host'],
+            user=data['user'],
+            password=data['password']
         )
         self.title = title
 
@@ -14,10 +34,12 @@ class Topic:
         mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
         mycursor.close()
 
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403',
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
             database='CourseFactory'
         )
         mycursor = self.mydb.cursor(buffered=True)
@@ -50,8 +72,3 @@ class Topic:
         if not isinstance(value, str):
             raise TypeError('Title must be str type')
         self.__title = value
-
-
-# a = Topic('Algebra')
-# a.save()
-# print(a)

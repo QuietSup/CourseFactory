@@ -1,12 +1,56 @@
 import mysql.connector
+import json
+from abc import ABC, abstractmethod
 
 
-class Course:
+class ICourse(ABC):
+    """Class is used to get info about courses and save it to the database"""
+    @abstractmethod
+    def save(self): pass
+    """Saves all planned changes"""
+
+    @property
+    @abstractmethod
+    def title(self): pass
+
+    @property
+    @abstractmethod
+    def teacher_id(self): pass
+
+    @property
+    @abstractmethod
+    def topic_id(self): pass
+
+    @property
+    @abstractmethod
+    def location_id(self): pass
+
+    @title.setter
+    @abstractmethod
+    def title(self, value): pass
+
+    @teacher_id.setter
+    @abstractmethod
+    def teacher_id(self, value): pass
+
+    @topic_id.setter
+    @abstractmethod
+    def topic_id(self, value): pass
+
+    @location_id.setter
+    @abstractmethod
+    def location_id(self, value): pass
+
+
+class Course(ICourse):
     def __init__(self, title: str, teacher_id: int, topic_id: list[int], location_id: int):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403'
+            host=data['host'],
+            user=data['user'],
+            password=data['password']
         )
         self.title = title
         self.teacher_id = teacher_id
@@ -17,10 +61,12 @@ class Course:
         mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
         mycursor.close()
 
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403',
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
             database='CourseFactory'
         )
         mycursor = self.mydb.cursor(buffered=True)
@@ -99,7 +145,3 @@ class Course:
         if value < 0:
             raise ValueError('id can\'t be negative')
         self.__location_id = value
-
-
-# a = Course('Math course', 1, [1, 2], 1)
-# a.save()

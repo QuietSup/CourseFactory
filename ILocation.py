@@ -1,12 +1,56 @@
 import mysql.connector
+import json
+from abc import ABC, abstractmethod
 
 
-class Location:
+class ILocation(ABC):
+    """Is used to add locations the the database"""
+    @abstractmethod
+    def save(self): pass
+    """Saves information about locations to the database"""
+
+    @property
+    @abstractmethod
+    def country(self): pass
+
+    @property
+    @abstractmethod
+    def city(self): pass
+
+    @property
+    @abstractmethod
+    def street(self): pass
+
+    @property
+    @abstractmethod
+    def building(self): pass
+
+    @country.setter
+    @abstractmethod
+    def country(self, value): pass
+
+    @city.setter
+    @abstractmethod
+    def city(self, value): pass
+
+    @street.setter
+    @abstractmethod
+    def street(self, value): pass
+
+    @building.setter
+    @abstractmethod
+    def building(self, value): pass
+
+
+class Location(ILocation):
     def __init__(self, country: str, city: str, street: str, building: int):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403'
+            host=data['host'],
+            user=data['user'],
+            password=data['password']
         )
         self.country = country
         self.city = city
@@ -87,8 +131,3 @@ class Location:
         if not isinstance(value, int):
             raise TypeError('Building must be int type')
         self.__building = value
-
-
-# a = Location("Ukraine", 'Kyiv', 'Akademika', 12)
-# a.save()
-# print(a)

@@ -1,9 +1,68 @@
 import json
-
 from numpy.core.defchararray import endswith
+from abc import ABC, abstractmethod
 
 
-class JsonFill:
+class IJsonFill(ABC):
+    """Is used to record data about database: host, user, password and headquarters"""
+    @abstractmethod
+    def save(self): pass
+    """Save info about privat data"""
+
+    @abstractmethod
+    """get info about privat data"""
+    def get_info(self) -> dict: pass
+
+    @property
+    @abstractmethod
+    def host(self): pass
+
+    @property
+    @abstractmethod
+    def user(self): pass
+
+    @property
+    @abstractmethod
+    def password(self): pass
+
+    @property
+    @abstractmethod
+    def local_country(self): pass
+
+    @property
+    @abstractmethod
+    def local_city(self): pass
+
+    @property
+    @abstractmethod
+    def file_name(self): pass
+
+    @host.setter
+    @abstractmethod
+    def host(self, value): pass
+
+    @user.setter
+    @abstractmethod
+    def user(self, value): pass
+
+    @password.setter
+    @abstractmethod
+    def password(self, value): pass
+
+    @local_country.setter
+    @abstractmethod
+    def local_country(self, value): pass
+
+    @local_city.setter
+    @abstractmethod
+    def local_city(self, value): pass
+
+    @file_name.setter
+    @abstractmethod
+    def file_name(self, value): pass
+
+
+class JsonFill(IJsonFill):
     def __init__(self, host, user, password, local_country, local_city):
         self.host = host
         self.user = user
@@ -89,7 +148,3 @@ class JsonFill:
         if not endswith(value, '.json'):
             raise TypeError('file must have .json type')
         self.__file_name = value
-
-
-x = JsonFill('localhost', 'root', 'vfrc15403', 'Ukraine', 'Kyiv')
-print(x.get_info())

@@ -1,17 +1,40 @@
 import mysql.connector
 from ICourse import Course
 import json
+from abc import ABC, abstractmethod
 
 
-class LocalCourse(Course):
+class ILocalCourse(ABC):
+    @abstractmethod
+    def save(self): pass
+    """Saves all planned changes"""
+
+
+class LocalCourse(Course, ILocalCourse):
     def __init__(self, title: str, first_name: str, last_name: str,
                  topic: list[str], street: str, building: int):
+        data = {}
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
         self.mydb = mysql.connector.connect(
-            host="localhost",
-            user="root",
-            password='vfrc15403',
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
             database='CourseFactory'
         )
+        mycursor = self.mydb.cursor(buffered=True)
+        mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
+        mycursor.close()
+
+        with open('factory.json', 'r') as read_file:
+            data = json.load(read_file)
+        self.mydb = mysql.connector.connect(
+            host=data['host'],
+            user=data['user'],
+            password=data['password'],
+            database='CourseFactory'
+        )
+
         mycursor = self.mydb.cursor(buffered=True)
         topic_id = []
         for item in topic:
@@ -34,7 +57,3 @@ class LocalCourse(Course):
                                 street, building))
 
         super().__init__(title, teacher_id, topic_id, mycursor.fetchone()[0])
-
-
-x = LocalCourse('oh', 'George', 'Kim', ['Math', 'Algebra'], 'Akademika', 12)
-x.save()
