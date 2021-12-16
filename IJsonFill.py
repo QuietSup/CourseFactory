@@ -10,8 +10,8 @@ class IJsonFill(ABC):
     """Save info about privat data"""
 
     @abstractmethod
-    """get info about privat data"""
     def get_info(self) -> dict: pass
+    """get info about privat data"""
 
     @property
     @abstractmethod
