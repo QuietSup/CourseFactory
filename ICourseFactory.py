@@ -66,8 +66,13 @@ class ICourseFactory(ABC):
         pass
 
     @abstractmethod
+    def __del__(self):
+        """Delete all data from tables"""
+        pass
+
+    @abstractmethod
     def __iter__(self):
-        """Is used for iterator"""
+        """Is used for iterator to go through all courses"""
         pass
 
     @abstractmethod
@@ -220,9 +225,20 @@ class CourseFactory(ICourseFactory):
         mycursor = self.mydb.cursor(buffered=True)
         mycursor.execute(func, (title,))
         self.mydb.commit()
-        result = mycursor.fetchall()
+        value = mycursor.fetchall()
+        if not value:
+            raise IndexError('Item doesn\'t exist')
         mycursor.close()
-        return result
+        return value
+
+    def __del__(self):
+        mycursor = self.mydb.cursor(buffered=True)
+        mycursor.execute('TRUNCATE TABLE `courses`')
+        mycursor.execute('TRUNCATE TABLE `locations`')
+        mycursor.execute('TRUNCATE TABLE `teachers`')
+        mycursor.execute('TRUNCATE TABLE `topics`')
+        self.mydb.commit()
+        mycursor.close()
 
     def __iter__(self):
         func = 'SELECT title FROM `courses`'
@@ -259,20 +275,25 @@ class CourseFactory(ICourseFactory):
 
 if __name__ == '__main__':
     obj = CourseFactory()
-    # obj.new_location('US', 'LA', 'Hetmana', 29)
-    # obj.new_topic('Inheritance')
-    # obj.new_topic('Encapsulation')
-    # obj.new_teacher('Kim', 'Taehyung')
-    # obj.new_teacher('Pak', 'Jimin')
-    # obj.new_offsite('OOP', 'Kim', 'Taehyung', ['Inheritance', 'Encapsulation'],
-    #                 'US', 'LA', 'Hetmana', 29)
-    # print(obj.locals)
-    # print(obj.offsites)
-    # print(obj['OOP'])
-    # for i in obj:
-    #     print(i)
-    # obj.new_headquarters('US', 'LA')
-    # obj.secure_db('avd', 'saas', 'fad')
-    # obj -= 'OOP'
-    # print(obj.secure_info)
-    # print('English' in obj)
+    obj.new_headquarters('Canada', 'Toronto')
+    obj.new_location('US', 'LA', 'Hetmana', 29)
+    obj.new_topic('Inheritance')
+    obj.new_topic('Encapsulation')
+    obj.new_teacher('Kim', 'Taehyung')
+    obj.new_teacher('Pak', 'Jimin')
+    obj.new_offsite('OOP', 'Kim', 'Taehyung', ['Inheritance', 'Encapsulation'],
+                    'US', 'LA', 'Hetmana', 29)
+    print(obj.offsites)
+    print(obj['OOP'])
+    for i in obj:
+        print(i)
+    obj.new_headquarters('US', 'LA')
+    obj -= 'OOP'
+    obj.new_headquarters('Ukraine', 'Kiev')
+    obj.new_local('English', 'Pak', 'Jimin', ['Inheritance', 'Encapsulation'], 'Akademika', 7)
+    print(obj.locals)
+    print(obj.secure_info)
+    print('English' in obj)
+    print(obj['English'])
+    obj.find_teacher('Pak', 'jimin')
+    del obj
