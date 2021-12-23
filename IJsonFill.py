@@ -7,13 +7,13 @@ class IJsonFill(ABC):
     """Is used to record data about database: host, user, password and headquarters"""
     @abstractmethod
     def save(self): 
-    """Save info about privat data"""
+        """Save info about privat data"""
         pass
 
     @property
     @abstractmethod
     def get_info(self) -> dict: 
-    """get info about privat data"""
+        """get info about privat data"""
         pass
 
     @property
