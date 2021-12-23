@@ -1,0 +1,7 @@
+{
+    "host": "localhost",
+    "user": "root",
+    "password": "password",
+    "local_country": "USA",
+    "local_city": "LA"
+}
