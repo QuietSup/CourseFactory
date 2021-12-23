@@ -6,8 +6,9 @@ from abc import ABC, abstractmethod
 class ICourse(ABC):
     """Class is used to get info about courses and save it to the database"""
     @abstractmethod
-    def save(self): pass
-    """Saves all planned changes"""
+    def save(self): 
+        """Saves all planned changes"""
+        pass
 
     @property
     @abstractmethod
