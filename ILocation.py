@@ -6,8 +6,9 @@ from abc import ABC, abstractmethod
 class ILocation(ABC):
     """Is used to add locations the the database"""
     @abstractmethod
-    def save(self): pass
-    """Saves information about locations to the database"""
+    def save(self):
+        """Saves information about locations to the database"""
+        pass
 
     @property
     @abstractmethod

@@ -7,6 +7,7 @@ from ITeacher import Teacher
 from ITopic import Topic
 from ILocalCourse import LocalCourse
 from IOffsiteCourse import OffsiteCourse
+from IJsonFill import JsonFill
 
 
 class ICourseFactory(ABC):
@@ -14,47 +15,77 @@ class ICourseFactory(ABC):
     @staticmethod
     @abstractmethod
     def new_local(title: str, first_name: str, last_name: str,
-                  topic: list[str], street: str, building: int): pass
-    """Creates new local course in the database"""
+                  topic: list[str], street: str, building: int):
+        """Creates new local course in the database"""
+        pass
 
     @staticmethod
     @abstractmethod
     def new_offsite(title: str, first_name: str, last_name: str, topic: list[str],
-                    country: str, city: str, street: str, building: int): pass
-    """Creates new offsite course in the database"""
+                    country: str, city: str, street: str, building: int):
+        """Creates new offsite course in the database"""
+        pass
 
-    @abstractmethod
     @property
-    def locals(self): pass
-    """Returns all the local courses"""
-
     @abstractmethod
-    @property
-    def offsites(self): pass
-    """Returns all the offsite courses"""
+    def locals(self):
+        """Returns all the local courses"""
+        pass
 
+    @property
+    @abstractmethod
+    def offsites(self):
+        """Returns all the offsite courses"""
+        pass
 
     @staticmethod
     @abstractmethod
-    def new_teacher(first_name: str, last_name: str): pass
-    """Creates teacher field in the database"""
+    def new_teacher(first_name: str, last_name: str):
+        """Creates teacher field in the database"""
+        pass
 
     @staticmethod
     @abstractmethod
-    def new_topic(title: str): pass
-    """Creates new topic"""
+    def new_topic(title: str):
+        """Creates new topic"""
+        pass
 
     @abstractmethod
-    def del_course(self, title: str): pass
-    """Deletes the course"""
+    def del_course(self, title: str):
+        """Deletes the course"""
+        pass
 
     @abstractmethod
-    def find_teacher(self, first_name: str, last_name: str): pass
-    """Find the teacher by name"""
+    def find_teacher(self, first_name: str, last_name: str):
+        """Find the teacher by name"""
+        pass
 
     @abstractmethod
-    def find_course(self, title: str): pass
-    """find a course by a title"""
+    def __getitem__(self, title: str):
+        """find a course by a title. Overloaded operator []"""
+        pass
+
+    @abstractmethod
+    def __iter__(self):
+        """Is used for iterator"""
+        pass
+
+    @abstractmethod
+    def __next__(self):
+        """is used to iterate through all courses"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def new_headquarters(country, city):
+        """Change headquarters country and city"""
+        pass
+
+    @staticmethod
+    @abstractmethod
+    def secure_db(host, user, password):
+        """Change host, user and password to access to database"""
+        pass
 
 
 class CourseFactory(ICourseFactory):
@@ -80,6 +111,7 @@ class CourseFactory(ICourseFactory):
         mycursor = self.mydb.cursor(buffered=True)
         mycursor.execute('CREATE DATABASE IF NOT EXISTS `CourseFactory`')
         mycursor.close()
+        self.index = 0
 
     @staticmethod
     def new_local(title: str, first_name: str, last_name: str,
@@ -133,7 +165,7 @@ class CourseFactory(ICourseFactory):
     @staticmethod
     def new_topic(title: str):
         new = Topic(title)
-        new.title()
+        new.save()
 
     @staticmethod
     def new_location(country: str, city: str, street: str, building: int):
@@ -161,16 +193,62 @@ class CourseFactory(ICourseFactory):
         mycursor.close()
         return result
 
-    def find_course(self, title: str):
-        func = 'SELECT co.title, CONCAT(first_name, '', last_name) AS teacher, ' \
-               'CONCAT(country, city, street, building) AS adress, ' \
-               'top.title ' \
-               'FROM `courses` co, `teachers` te, `locations` lo, `topics` top ' \
-               'WHERE teacher_id=te.id and location_id=lo.id and top.id=co.topic_id ' \
-               'and co.title=%s'
+    def __getitem__(self, title: str):
+        func = "SELECT co.title, first_name, last_name, " \
+               "country, city, street, building, " \
+               "top.title " \
+               "FROM `courses` co, `teachers` te, `locations` lo, `topics` top " \
+               "WHERE teacher_id=te.id and location_id=lo.id and top.id=co.topic_id " \
+               "and co.title=%s"
         mycursor = self.mydb.cursor(buffered=True)
         mycursor.execute(func, (title,))
         self.mydb.commit()
         result = mycursor.fetchall()
         mycursor.close()
         return result
+
+    def __iter__(self):
+        func = 'SELECT title FROM `courses`'
+        mycursor = self.mydb.cursor(buffered=True)
+        mycursor.execute(func)
+        self.courses = list(set([x[0] for x in mycursor.fetchall()]))
+        return self
+
+    def __next__(self):
+        if self.index >= len(self.courses) - 1:
+            raise StopIteration()
+        self.index += 1
+        return self[self.courses[self.index]]
+
+    @staticmethod
+    def new_headquarters(country, city):
+        secure = JsonFill(None, None, None, country, city)
+        info = secure.get_info
+        secure = JsonFill(info['host'], info['user'], info['password'], country, city)
+        secure.save()
+
+    @staticmethod
+    def secure_db(host, user, password):
+        secure = JsonFill(host, user, password, None, None)
+        info = secure.get_info
+        secure = JsonFill(host, user, password, info['local_country'], info['local_city'])
+        secure.save()
+
+
+if __name__ == '__main__':
+    obj = CourseFactory()
+    # obj.new_local('Django', 'George', 'Kim', ['Math'], 'Akademika', 12)
+    # obj.new_location('US', 'LA', 'Hetmana', 29)
+    # obj.new_topic('Inheritance')
+    # obj.new_topic('Encapsulation')
+    # obj.new_teacher('Kim', 'Taehyung')
+    # obj.new_teacher('Pak', 'Jimin')
+    # obj.new_offsite('OOP', 'Kim', 'Taehyung', ['Inheritance', 'Encapsulation'],
+    #                 'US', 'LA', 'Hetmana', 29)
+    # print(obj.locals)
+    # print(obj.offsites)
+    # print(obj['OOP'])
+    # for i in obj:
+    #     print(i)
+    # obj.new_headquarters('US', 'LA')
+    # obj.secure_db('avd', 'saas', 'fad')

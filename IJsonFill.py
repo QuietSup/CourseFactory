@@ -9,6 +9,7 @@ class IJsonFill(ABC):
     def save(self): pass
     """Save info about privat data"""
 
+    @property
     @abstractmethod
     def get_info(self) -> dict: pass
     """get info about privat data"""
@@ -63,7 +64,8 @@ class IJsonFill(ABC):
 
 
 class JsonFill(IJsonFill):
-    def __init__(self, host, user, password, local_country, local_city):
+    def __init__(self, host=None, user=None, password=None,
+                 local_country=None, local_city=None):
         self.host = host
         self.user = user
         self.password = password
@@ -83,6 +85,7 @@ class JsonFill(IJsonFill):
         with open(self.file_name, 'w') as write_file:
             json.dump(data, write_file, indent=4)
 
+    @property
     def get_info(self) -> dict:
         with open(self.file_name, 'r') as read_file:
             return json.load(read_file)
@@ -113,31 +116,31 @@ class JsonFill(IJsonFill):
 
     @host.setter
     def host(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise TypeError('Host must be str type')
         self.__host = value
 
     @user.setter
     def user(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise TypeError('User must be str type')
         self.__user = value
 
     @password.setter
     def password(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise TypeError('password must be str type')
         self.__password = value
 
     @local_country.setter
     def local_country(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise TypeError('local_country must be str type')
         self.__local_country = value
 
     @local_city.setter
     def local_city(self, value):
-        if not isinstance(value, str):
+        if not isinstance(value, str) and value is not None:
             raise TypeError('local_city must be str type')
         self.__local_city = value
 
