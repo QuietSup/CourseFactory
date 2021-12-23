@@ -188,6 +188,17 @@ class CourseFactory(ICourseFactory):
         self.mydb.commit()
         mycursor.close()
 
+    def __contains__(self, title: str):
+        if not isinstance(title, str):
+            raise TypeError('title must be str type')
+        func = 'SELECT title FROM `courses` ' \
+               'WHERE title=%s'
+        mycursor = self.mydb.cursor(buffered=True)
+        mycursor.execute(func, (title,))
+        result = mycursor.fetchone()
+        mycursor.close()
+        return False if result is None else True
+
     def find_teacher(self, first_name: str, last_name: str):
         func = 'SELECT first_name, last_name, title ' \
                'FROM `teachers` t, `courses` c ' \
@@ -264,3 +275,4 @@ if __name__ == '__main__':
     # obj.secure_db('avd', 'saas', 'fad')
     # obj -= 'OOP'
     # print(obj.secure_info)
+    # print('English' in obj)
