@@ -6,8 +6,9 @@ from abc import ABC, abstractmethod
 class ITopic(ABC):
     """Is used to add topics to the database"""
     @abstractmethod
-    def save(self): pass
+    def save(self): 
     """Save entered data about topic to the database"""
+        pass
 
     @property
     @abstractmethod
