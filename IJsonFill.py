@@ -6,13 +6,15 @@ from abc import ABC, abstractmethod
 class IJsonFill(ABC):
     """Is used to record data about database: host, user, password and headquarters"""
     @abstractmethod
-    def save(self): pass
+    def save(self): 
     """Save info about privat data"""
+        pass
 
     @property
     @abstractmethod
-    def get_info(self) -> dict: pass
+    def get_info(self) -> dict: 
     """get info about privat data"""
+        pass
 
     @property
     @abstractmethod
