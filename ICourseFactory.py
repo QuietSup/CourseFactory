@@ -51,7 +51,7 @@ class ICourseFactory(ABC):
         pass
 
     @abstractmethod
-    def del_course(self, title: str):
+    def __isub__(self, title: str):
         """Deletes the course"""
         pass
 
@@ -85,6 +85,12 @@ class ICourseFactory(ABC):
     @abstractmethod
     def secure_db(host, user, password):
         """Change host, user and password to access to database"""
+        pass
+
+    @property
+    @abstractmethod
+    def secure_info(self):
+        """Get info about host, user, password and headquarters address from .json file"""
         pass
 
 
@@ -172,7 +178,7 @@ class CourseFactory(ICourseFactory):
         new = Location(country, city, street, building)
         new.save()
 
-    def del_course(self, title: str):
+    def __isub__(self, title: str):
         if not isinstance(title, str):
             raise TypeError('title must be str type')
         func = 'DELETE FROM `courses` ' \
@@ -222,22 +228,26 @@ class CourseFactory(ICourseFactory):
 
     @staticmethod
     def new_headquarters(country, city):
-        secure = JsonFill(None, None, None, country, city)
+        secure = JsonFill(local_country=country, local_city=city)
         info = secure.get_info
         secure = JsonFill(info['host'], info['user'], info['password'], country, city)
         secure.save()
 
     @staticmethod
     def secure_db(host, user, password):
-        secure = JsonFill(host, user, password, None, None)
+        secure = JsonFill(host, user, password)
         info = secure.get_info
         secure = JsonFill(host, user, password, info['local_country'], info['local_city'])
         secure.save()
 
+    @property
+    def secure_info(self):
+        secure = JsonFill()
+        return secure.get_info
+
 
 if __name__ == '__main__':
     obj = CourseFactory()
-    # obj.new_local('Django', 'George', 'Kim', ['Math'], 'Akademika', 12)
     # obj.new_location('US', 'LA', 'Hetmana', 29)
     # obj.new_topic('Inheritance')
     # obj.new_topic('Encapsulation')
@@ -252,3 +262,5 @@ if __name__ == '__main__':
     #     print(i)
     # obj.new_headquarters('US', 'LA')
     # obj.secure_db('avd', 'saas', 'fad')
+    # obj -= 'OOP'
+    # print(obj.secure_info)
